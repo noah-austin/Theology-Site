@@ -1,0 +1,40 @@
+---
+/** A quoted passage with its reference. Wrap the text in the slot. */
+interface Props {
+  ref: string;
+  translation?: string;
+}
+const { ref, translation = 'ESV' } = Astro.props;
+---
+
+<blockquote class="scripture">
+  <div class="text"><slot /></div>
+  <cite>{ref} <span class="tr">({translation})</span></cite>
+</blockquote>
+
+<style>
+  .scripture {
+    margin: 1.5em 0;
+    padding: 0.25em 0 0.25em 1.25em;
+    border-left: 3px solid var(--gold);
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+  .text :global(p:last-child) {
+    margin-bottom: 0;
+  }
+  cite {
+    display: block;
+    margin-top: 0.4em;
+    font-style: normal;
+    font-variant-caps: small-caps;
+    letter-spacing: 0.06em;
+    font-size: 0.9em;
+    color: var(--ink-muted);
+  }
+  .tr {
+    font-variant-caps: normal;
+    letter-spacing: 0;
+    color: var(--ink-faint);
+  }
+</style>

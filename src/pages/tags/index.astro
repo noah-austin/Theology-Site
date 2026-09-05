@@ -1,0 +1,72 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { getPublishedEntries } from '@lib/entries';
+import { tagUrl, url } from '@lib/url';
+
+const entries = await getPublishedEntries();
+const counts = new Map<string, number>();
+for (const e of entries) for (const t of e.data.tags) counts.set(t, (counts.get(t) ?? 0) + 1);
+const tags = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+---
+
+<BaseLayout title="Tags" description="Every tag used across the book.">
+  <div class="container page">
+    <nav class="label crumbs" aria-label="Breadcrumb">
+      <a href={url('/')}>Directory</a>
+      <span aria-hidden="true">›</span>
+      <span aria-current="page">Tags</span>
+    </nav>
+    <h1>Tags</h1>
+    <p class="description">Threads that run across categories.</p>
+    {
+      tags.length === 0 ? (
+        <p class="empty">No tags yet.</p>
+      ) : (
+        <ul class="cloud">
+          {tags.map(([tag, n]) => (
+            <li>
+              <a class="tag big" href={tagUrl(tag)}>
+                {tag} <span class="n">{n}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    max-width: var(--measure);
+    padding-top: 1.5rem;
+  }
+  .crumbs {
+    display: flex;
+    gap: 0.6em;
+    margin-bottom: 1.25rem;
+  }
+  h1 {
+    color: var(--vermilion);
+  }
+  .description {
+    color: var(--ink-soft);
+    margin: 0.5rem 0 1.5rem;
+  }
+  .cloud {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .tag.big {
+    font-size: 1rem;
+    padding: 0.45em 0.8em 0.5em;
+  }
+  .n {
+    color: var(--ink-faint);
+    margin-left: 0.3em;
+  }
+</style>

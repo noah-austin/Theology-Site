@@ -1,0 +1,128 @@
+---
+import { SITE } from '@data/site';
+import { url } from '@lib/url';
+import ThemeToggle from './ThemeToggle.astro';
+
+const path = Astro.url.pathname;
+const base = import.meta.env.BASE_URL;
+const isActive = (href: string) => (href === base ? path === base : path.startsWith(href));
+
+const nav = [
+  { label: 'Directory', href: url('/') },
+  { label: 'Glossary', href: url('/glossary/') },
+  { label: 'Search', href: url('/search/') },
+  { label: 'About', href: url('/about/') },
+];
+---
+
+<header class="site-header">
+  <div class="container inner">
+    <a class="wordmark" href={url('/')} aria-label={`${SITE.name} home`}>
+      <span class="mark" aria-hidden="true">❧</span>
+      <span class="name">{SITE.name}</span>
+    </a>
+    <nav aria-label="Primary">
+      <ul>
+        {
+          nav.map((item) => (
+            <li>
+              <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <ThemeToggle />
+  </div>
+</header>
+
+<style>
+  .site-header {
+    border-bottom: 3px double var(--rule-strong);
+    background: color-mix(in srgb, var(--bg) 85%, var(--bg-elev));
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(6px);
+  }
+  .inner {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    min-height: 3.75rem;
+    flex-wrap: wrap;
+    padding-block: 0.4rem;
+  }
+  .wordmark {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    text-decoration: none;
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.65rem;
+    letter-spacing: 0.02em;
+    margin-right: auto;
+  }
+  .wordmark .mark {
+    color: var(--vermilion);
+    font-size: 1.3rem;
+    transform: translateY(-0.05em);
+  }
+  .wordmark:hover .name {
+    color: var(--vermilion);
+  }
+  nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 1.25rem;
+  }
+  nav a {
+    text-decoration: none;
+    color: var(--ink-soft);
+    font-variant-caps: small-caps;
+    letter-spacing: 0.08em;
+    font-size: 1.05rem;
+    padding: 0.25rem 0;
+    border-bottom: 2px solid transparent;
+  }
+  nav a:hover {
+    color: var(--vermilion);
+  }
+  nav a[aria-current='page'] {
+    color: var(--ink);
+    border-bottom-color: var(--gold);
+  }
+  @media (max-width: 560px) {
+    .inner {
+      gap: 0.75rem 1rem;
+    }
+    nav {
+      order: 3;
+      width: 100%;
+    }
+    nav ul {
+      gap: 1rem;
+      justify-content: space-between;
+    }
+  }
+</style>
+
+<script>
+  // Press "/" anywhere (outside a text field) to jump to search.
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+    const el = document.activeElement as HTMLElement | null;
+    if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)) return;
+    const link = document.querySelector<HTMLAnchorElement>('nav a[href$="/search/"]');
+    if (link) {
+      e.preventDefault();
+      location.href = link.href;
+    }
+  });
+</script>

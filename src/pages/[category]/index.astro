@@ -1,0 +1,118 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import EntryCard from '@components/EntryCard.astro';
+import { CATEGORIES, type CategorySlug } from '@data/categories';
+import { SITE } from '@data/site';
+import { getEntriesInCategory } from '@lib/entries';
+import { tagUrl, url } from '@lib/url';
+
+export function getStaticPaths() {
+  return CATEGORIES.filter((c) => c.kind === 'entries').map((c) => ({
+    params: { category: c.slug },
+    props: { category: c },
+  }));
+}
+
+const { category } = Astro.props;
+const entries = await getEntriesInCategory(category.slug as CategorySlug);
+const tags = [...new Set(entries.flatMap((e) => e.data.tags))].sort();
+---
+
+<BaseLayout title={category.name} description={category.description} accent={`accent-${category.accent}`}>
+  <div class="container">
+    <nav class="label crumbs" aria-label="Breadcrumb">
+      <a href={url('/')}>Directory</a>
+      <span aria-hidden="true">›</span>
+      <span aria-current="page">{category.name}</span>
+    </nav>
+
+    <header class="head">
+      <span class="initial initial--lg" aria-hidden="true">{category.initial}</span>
+      <div>
+        <h1>{category.name}</h1>
+        <p class="description">{category.description}</p>
+      </div>
+    </header>
+
+    {
+      tags.length > 0 && (
+        <ul class="tag-cloud" aria-label="Tags in this category">
+          {tags.map((t) => (
+            <li>
+              <a class="tag" href={tagUrl(t)}>{t}</a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+
+    {
+      entries.length === 0 ? (
+        <div class="empty">
+          <p>This shelf is empty. Nothing has been added to {category.name} yet.</p>
+          <p class="hint">
+            Add a file under <code>{SITE.contentPath}/{category.slug}/</code> and it will appear here.
+          </p>
+        </div>
+      ) : (
+        <div class="list">
+          {entries.map((entry) => (
+            <EntryCard entry={entry} />
+          ))}
+        </div>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .crumbs {
+    display: flex;
+    gap: 0.6em;
+    padding-top: 1.5rem;
+  }
+  .head {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+    margin: 1.5rem 0 1.5rem;
+    max-width: 52rem;
+  }
+  .head h1 {
+    color: var(--accent);
+  }
+  .description {
+    margin: 0.5rem 0 0;
+    font-size: 1.15rem;
+    color: var(--ink-soft);
+    text-wrap: pretty;
+  }
+  .tag-cloud {
+    list-style: none;
+    margin: 0 0 1.5rem;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+    gap: 1rem;
+  }
+  .empty .hint {
+    font-size: 0.95rem;
+    margin-bottom: 0;
+    font-style: normal;
+  }
+  .empty code {
+    background: var(--bg-sunken);
+    padding: 0.1em 0.35em;
+    border-radius: 3px;
+  }
+  @media (max-width: 560px) {
+    .head {
+      flex-direction: column;
+    }
+  }
+</style>

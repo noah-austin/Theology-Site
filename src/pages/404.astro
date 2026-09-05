@@ -1,0 +1,39 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { url } from '@lib/url';
+---
+
+<BaseLayout title="Page not found" description="That page is not in the book.">
+  <div class="container page">
+    <p class="label eyebrow">404</p>
+    <h1>That leaf is missing</h1>
+    <p class="lede">Nothing is filed at this address. It may have been moved, renamed, or never written.</p>
+    <p class="actions">
+      <a class="button" href={url('/')}>Back to the directory</a>
+      <a class="button" href={url('/search/')}>Search the book</a>
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    max-width: var(--measure);
+    padding-top: 4rem;
+    text-align: center;
+  }
+  .eyebrow {
+    color: var(--vermilion);
+  }
+  .lede {
+    color: var(--ink-soft);
+    font-size: 1.2rem;
+    margin-top: 1rem;
+  }
+  .actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+  }
+</style>

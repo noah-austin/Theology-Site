@@ -1,0 +1,58 @@
+---
+import type { Category } from '@data/categories';
+import { categoryUrl } from '@lib/url';
+
+interface Props {
+  category: Category;
+  count?: number;
+}
+const { category, count } = Astro.props;
+const countLabel =
+  category.kind === 'glossary'
+    ? count === undefined
+      ? ''
+      : `${count} ${count === 1 ? 'term' : 'terms'}`
+    : count === undefined
+      ? ''
+      : count === 0
+        ? 'Empty shelf'
+        : `${count} ${count === 1 ? 'entry' : 'entries'}`;
+---
+
+<a class:list={['card', 'category-card', `accent-${category.accent}`]} href={categoryUrl(category.slug)}>
+  <span class="initial" aria-hidden="true">{category.initial}</span>
+  <span class="body">
+    <h2>{category.name}</h2>
+    <p class="tagline">{category.tagline}</p>
+    {countLabel && <span class="count label">{countLabel}</span>}
+  </span>
+</a>
+
+<style>
+  .category-card {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    height: 100%;
+  }
+  .body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+  h2 {
+    font-size: 1.55rem;
+    transition: color 120ms ease;
+  }
+  .tagline {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 1.02rem;
+    line-height: 1.4;
+  }
+  .count {
+    margin-top: 0.35rem;
+    font-size: 0.85rem;
+  }
+</style>

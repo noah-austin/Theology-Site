@@ -1,0 +1,76 @@
+---
+title: 'The Structure of Revelation'
+description: 'The book at a glance: its ten movements laid across twenty-two chapters, the three series of sevens, the interludes, and the question of whether the visions run in sequence or repeat.'
+category: charts-and-diagrams
+tags: [revelation, structure, apocalyptic, outline]
+date: 2026-09-05
+order: 1
+sources:
+  - label: 'The Book of Revelation (NIGTC)'
+    note: 'G. K. Beale (Eerdmans, 1999), introduction on structure and recapitulation.'
+  - label: 'The Theology of the Book of Revelation'
+    note: 'Richard Bauckham (Cambridge, 1993).'
+  - label: 'Revelation (Baker Exegetical)'
+    note: 'Grant Osborne (Baker, 2002), outline.'
+---
+
+import Figure from '@components/Figure.astro';
+import Callout from '@components/Callout.astro';
+import ChapterStrip from '@components/charts/ChapterStrip.astro';
+
+export const sections = [
+  { label: 'Prologue', from: 1, to: 1, tone: 'a' },
+  { label: 'Seven letters', from: 2, to: 3, tone: 'b' },
+  { label: 'Throne room', from: 4, to: 5, tone: 'c' },
+  { label: 'Seven seals', from: 6, to: 7, tone: 'd' },
+  { label: 'Seven trumpets', from: 8, to: 11, tone: 'e' },
+  { label: 'Cosmic conflict', from: 12, to: 14, tone: 'f' },
+  { label: 'Seven bowls', from: 15, to: 16, tone: 'd' },
+  { label: 'Fall of Babylon', from: 17, to: 18, tone: 'g' },
+  { label: 'Return, millennium, judgment', from: 19, to: 20, tone: 'e' },
+  { label: 'New creation', from: 21, to: 22, tone: 'c' },
+];
+
+Revelation is easier to hold in the mind as ten movements than as twenty-two chapters. The chart shows where each movement falls; the table under it says what happens in each.
+
+<Figure wide caption="Chapter 8 belongs to both the seals and the trumpets: the seventh seal is opened in 8:1 and the trumpets begin in 8:2. It is shown with the trumpets here.">
+  <ChapterStrip title="Structure of Revelation by chapter" chapters={22} sections={sections} />
+</Figure>
+
+## The ten movements
+
+| Movement | Chapters | What happens |
+| --- | --- | --- |
+| Prologue | 1 | Title, blessing, greeting to the seven churches, and John's vision of the risen Christ among the lampstands. |
+| Seven letters | 2–3 | Christ addresses Ephesus, Smyrna, Pergamum, Thyatira, Sardis, Philadelphia, and Laodicea. Each letter follows the same pattern: description of Christ, commendation, rebuke, call, promise. |
+| Throne room | 4–5 | Heaven's worship. The scroll with seven seals; no one is worthy to open it until the Lion who is a slain Lamb appears. |
+| Seven seals | 6–7 | The four horsemen (seals 1–4), the martyrs under the altar (5), cosmic collapse (6). Interlude: the 144,000 sealed and the great multitude from every nation. |
+| Seven trumpets | 8–11 | The seventh seal opens into silence, then seven trumpets: a third of earth, sea, rivers, and sky struck; locusts and cavalry. Interlude: the little scroll and the two witnesses. The seventh trumpet announces the kingdom. |
+| Cosmic conflict | 12–14 | The woman, the dragon, and the child; war in heaven; the beast from the sea and the beast from the earth; 666. The Lamb on Zion, three angels, the harvest of the earth. |
+| Seven bowls | 15–16 | The last plagues, poured out in full rather than in thirds. Armageddon is named. "It is done." |
+| Fall of Babylon | 17–18 | The prostitute on the beast is identified and destroyed. A lament and a celebration over the fallen city. |
+| Return, millennium, judgment | 19–20 | The marriage supper of the Lamb; the Rider on the white horse; the beast and false prophet thrown into the lake of fire. Satan bound a thousand years; the saints reign; Satan released and defeated; the great white throne. |
+| New creation | 21–22 | New heaven, new earth, new Jerusalem. No temple, no night, no curse. "Come, Lord Jesus." |
+
+## The sevens
+
+Three numbered series of seven organise the middle of the book, and each series has the same shape: six items, then a pause, then the seventh.
+
+| Series | Chapters | Scope of judgment | Interlude before the seventh |
+| --- | --- | --- | --- |
+| Seals | 6:1–8:1 | A quarter of the earth (6:8) | The 144,000 and the great multitude (7) |
+| Trumpets | 8:2–11:19 | A third of the earth (8:7–12) | The little scroll and the two witnesses (10:1–11:14) |
+| Bowls | 15:1–16:21 | Total (16:3, "every living thing") | None; the bowls come without pause |
+
+Two further sevens are unnumbered but often counted: the seven letters (2–3) and the seven visions of the end (19:11–21:8, each beginning "and I saw"). Together with the seven beatitudes scattered through the book (1:3; 14:13; 16:15; 19:9; 20:6; 22:7; 22:14), the pattern is too regular to be accidental.
+
+## Sequence or recapitulation?
+
+The question that shapes every commentary is whether the three series happen one after another (the trumpets follow the seals, the bowls follow the trumpets) or whether they cover the same period three times with rising intensity.
+
+- **Sequential (telescoping).** The seventh seal *contains* the seven trumpets (8:1–2), and the seventh trumpet *contains* the seven bowls. Judgment intensifies from a quarter to a third to everything. This is the usual futurist reading.
+- **Recapitulation.** Each series ends at the same place: the sixth seal, the seventh trumpet, and the seventh bowl all describe the final collapse and the arrival of the end (6:12–17; 11:15–19; 16:17–21). The series are parallel portraits of the same age, each from a different angle. This is the usual idealist and amillennial reading, and it goes back to Victorinus in the third century.
+
+<Callout variant="note">
+  <p>The choice matters most at chapter 20. If Revelation runs in sequence, the thousand years follow the return of Christ in chapter 19, which is premillennialism. If chapter 20 recapitulates and returns to the beginning of the church age, the thousand years are now, which is amillennialism.</p>
+</Callout>

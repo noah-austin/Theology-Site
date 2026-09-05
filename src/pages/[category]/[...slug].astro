@@ -1,0 +1,241 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import TableOfContents from '@components/TableOfContents.astro';
+import { getCategory } from '@data/categories';
+import { SITE } from '@data/site';
+import { formatDate, getEntriesInCategory, getPublishedEntries, lastUpdated, parseId } from '@lib/entries';
+import { categoryUrl, entryUrl, tagUrl, url } from '@lib/url';
+
+export async function getStaticPaths() {
+  const entries = await getPublishedEntries();
+  return entries.map((entry) => {
+    const { category, slug } = parseId(entry.id);
+    return { params: { category, slug }, props: { entry } };
+  });
+}
+
+const { entry } = Astro.props;
+const category = getCategory(entry.data.category)!;
+const { Content, headings } = await render(entry);
+
+const siblings = await getEntriesInCategory(entry.data.category);
+const index = siblings.findIndex((e) => e.id === entry.id);
+const prev = index > 0 ? siblings[index - 1] : undefined;
+const next = index < siblings.length - 1 ? siblings[index + 1] : undefined;
+
+const editHref = entry.filePath ? `${SITE.repo}/blob/${SITE.branch}/${entry.filePath}` : SITE.repo;
+const hasToc = headings.filter((h) => h.depth === 2 || h.depth === 3).length >= 3;
+---
+
+<BaseLayout title={entry.data.title} description={entry.data.description} accent={`accent-${category.accent}`}>
+  <article class="container entry">
+    <header class="entry-head">
+      <nav class="label crumbs" aria-label="Breadcrumb">
+        <a href={url('/')}>Directory</a>
+        <span aria-hidden="true">›</span>
+        <a href={categoryUrl(category.slug)}>{category.name}</a>
+      </nav>
+      <h1>{entry.data.title}</h1>
+      <p class="lede">{entry.data.description}</p>
+      <div class="meta label">
+        <span>
+          {entry.data.updated ? 'Updated' : 'Written'}{' '}
+          <time datetime={lastUpdated(entry).toISOString()}>{formatDate(lastUpdated(entry))}</time>
+        </span>
+        {
+          entry.data.tags.length > 0 && (
+            <ul class="tags" aria-label="Tags">
+              {entry.data.tags.map((t) => (
+                <li>
+                  <a class="tag" href={tagUrl(t)}>{t}</a>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </div>
+      <hr class="rule-double" />
+    </header>
+
+    <div class:list={['entry-body', hasToc && 'with-toc']}>
+      {
+        hasToc && (
+          <aside class="sidebar">
+            <div class="sticky">
+              <TableOfContents headings={headings} />
+            </div>
+          </aside>
+        )
+      }
+      <div class="prose has-dropcap">
+        <Content />
+
+        {
+          entry.data.sources.length > 0 && (
+            <section class="sources">
+              <h2 id="sources">Sources</h2>
+              <ul>
+                {entry.data.sources.map((s) => (
+                  <li>
+                    {s.url ? <a href={s.url} rel="noopener">{s.label}</a> : s.label}
+                    {s.note && <span class="note"> — {s.note}</span>}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+      </div>
+    </div>
+
+    <footer class="entry-foot">
+      <div class="ornament" aria-hidden="true"><span>❦</span></div>
+      <nav class="pager" aria-label="More in this category">
+        {
+          prev ? (
+            <a class="pager-link prev" href={entryUrl(prev.id)}>
+              <span class="label">← Previous in {category.name}</span>
+              <span class="title">{prev.data.title}</span>
+            </a>
+          ) : (
+            <span />
+          )
+        }
+        {
+          next ? (
+            <a class="pager-link next" href={entryUrl(next.id)}>
+              <span class="label">Next in {category.name} →</span>
+              <span class="title">{next.data.title}</span>
+            </a>
+          ) : (
+            <span />
+          )
+        }
+      </nav>
+      <p class="edit label">
+        <a href={editHref} rel="noopener">View this entry’s source on GitHub</a>
+      </p>
+    </footer>
+  </article>
+</BaseLayout>
+
+<style>
+  .entry {
+    padding-top: 1.5rem;
+  }
+  .crumbs {
+    display: flex;
+    gap: 0.6em;
+    margin-bottom: 1.25rem;
+  }
+  .entry-head {
+    max-width: var(--measure);
+  }
+  .entry-head h1 {
+    color: var(--accent);
+  }
+  .lede {
+    margin: 0.9rem 0 0.75rem;
+    font-size: 1.3rem;
+    line-height: 1.4;
+    color: var(--ink-soft);
+    font-style: italic;
+    text-wrap: pretty;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.25rem;
+  }
+  .tags {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+  .entry-head .rule-double {
+    margin: 1.25rem 0 0;
+  }
+  .entry-body {
+    margin-top: 2rem;
+  }
+  .entry-body.with-toc {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 15rem;
+    gap: 3rem;
+  }
+  .entry-body.with-toc .sidebar {
+    order: 2;
+  }
+  .sticky {
+    position: sticky;
+    top: 5rem;
+  }
+  @media (max-width: 900px) {
+    .entry-body.with-toc {
+      display: block;
+    }
+    .sidebar {
+      margin-bottom: 2rem;
+      padding: 1rem 1.25rem;
+      border: 1px solid var(--rule);
+      border-radius: var(--radius);
+      background: var(--bg-elev);
+      max-width: var(--measure);
+    }
+  }
+  .sources ul {
+    padding-left: 1.2em;
+    font-size: 0.98rem;
+  }
+  .sources .note {
+    color: var(--ink-muted);
+  }
+  .entry-foot {
+    max-width: var(--measure);
+  }
+  .pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .pager-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    text-decoration: none;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+    color: var(--ink);
+  }
+  .pager-link:hover {
+    border-color: var(--accent);
+  }
+  .pager-link:hover .title {
+    color: var(--accent);
+  }
+  .pager-link.next {
+    text-align: right;
+    align-items: flex-end;
+  }
+  .pager-link .title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.2rem;
+  }
+  .edit {
+    margin-top: 1.5rem;
+    text-align: center;
+  }
+  @media (max-width: 560px) {
+    .pager {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

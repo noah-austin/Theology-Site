@@ -1,0 +1,50 @@
+---
+import { SITE } from '@data/site';
+import { url } from '@lib/url';
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container inner">
+    <p class="colophon">
+      <span class="fleuron" aria-hidden="true">❦</span>
+      <span>{SITE.name}, a commonplace book kept by {SITE.author}.</span>
+    </p>
+    <p class="links label">
+      <a href={url('/about/')}>About</a>
+      <span aria-hidden="true">·</span>
+      <a href={SITE.repo} rel="noopener">Source on GitHub</a>
+      <span aria-hidden="true">·</span>
+      <span>{year}</span>
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: 5rem;
+    border-top: 3px double var(--rule-strong);
+    padding: 2rem 0 2.5rem;
+    color: var(--ink-muted);
+    font-size: 0.95rem;
+  }
+  .inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem 2rem;
+  }
+  .colophon {
+    margin: 0;
+    font-style: italic;
+  }
+  .fleuron {
+    color: var(--vermilion);
+    margin-right: 0.4em;
+  }
+  .links {
+    margin: 0;
+    display: flex;
+    gap: 0.6em;
+  }
+</style>

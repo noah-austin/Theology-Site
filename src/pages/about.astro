@@ -1,0 +1,126 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Callout from '@components/Callout.astro';
+import { CATEGORIES } from '@data/categories';
+import { SITE } from '@data/site';
+import { categoryUrl } from '@lib/url';
+---
+
+<BaseLayout title="About" description="What this site is, how it is organized, and how views are handled.">
+  <article class="container page">
+    <header class="head">
+      <p class="label eyebrow">About this book</p>
+      <h1>How Commonplace works</h1>
+    </header>
+
+    <div class="prose has-dropcap">
+      <p>
+        From the Renaissance on, serious readers kept a <em>commonplace book</em>: a bound volume
+        where they copied passages worth remembering, sketched arguments, and drew the diagrams that
+        helped them see a subject whole. It was not a diary and not a treatise. It was a working
+        reference, organized under headings, meant to be opened again.
+      </p>
+      <p>
+        This site is that book for theology. Charts, timelines, word studies, and notes are filed
+        under a handful of shelves so that anything can be found again in a few seconds.
+      </p>
+
+      <h2>The shelves</h2>
+      <dl class="shelves">
+        {
+          CATEGORIES.map((c) => (
+            <div class={`shelf accent-${c.accent}`}>
+              <dt>
+                <span class="initial" aria-hidden="true">{c.initial}</span>
+                <a href={categoryUrl(c.slug)}>{c.name}</a>
+              </dt>
+              <dd>{c.description}</dd>
+            </div>
+          ))
+        }
+      </dl>
+
+      <h2>On competing views</h2>
+      <p>
+        Where Christians disagree, each position is summarized on its own terms: what it claims, the
+        texts it leans on, who has held it, and the strongest objections to it. The aim is that an
+        adherent of any view would recognize their own position in the summary.
+      </p>
+      <p>
+        Where the author has landed on a question, that is marked separately and clearly, in a box
+        like this one, so that the summary and the opinion never blur together:
+      </p>
+      <Callout variant="take">
+        <p>
+          This is what a “my take” box looks like. It sits apart from the even-handed summary
+          above it, and it is always allowed to say “undecided.”
+        </p>
+      </Callout>
+      <p>Other boxes flag notes, key texts, and cautions:</p>
+      <Callout variant="scripture" title="Key text">
+        <p>“For the Lord himself will descend from heaven with a cry of command…” (1 Thess. 4:16)</p>
+      </Callout>
+      <Callout variant="caution">
+        <p>A caution box marks a common misreading or a place where the evidence is thinner than it looks.</p>
+      </Callout>
+
+      <h2>Conventions</h2>
+      <ul>
+        <li>Scripture quotations are from the ESV unless marked otherwise.</li>
+        <li>Greek and Hebrew are given in the original script with a transliteration on first use.</li>
+        <li>Dates on entries show when they were written or last meaningfully revised.</li>
+        <li>Every entry links to its source file, so corrections are easy to trace.</li>
+      </ul>
+
+      <h2>Colophon</h2>
+      <p>
+        Set in <em>EB Garamond</em> and <em>Cormorant Garamond</em>. Built with Astro, hosted on
+        GitHub Pages, and open at <a href={SITE.repo} rel="noopener">{SITE.repo.replace('https://', '')}</a>.
+      </p>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .page {
+    max-width: var(--measure);
+    padding-top: 2.5rem;
+  }
+  .head {
+    margin-bottom: 2rem;
+  }
+  .eyebrow {
+    color: var(--vermilion);
+    margin: 0 0 0.4rem;
+  }
+  .shelves {
+    margin: 0;
+    display: grid;
+    gap: 1rem;
+  }
+  .shelf dt {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.35rem;
+  }
+  .shelf dt a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .shelf dt a:hover {
+    color: var(--accent);
+  }
+  .shelf .initial {
+    width: 2.1rem;
+    height: 2.1rem;
+    font-size: 1.4rem;
+  }
+  .shelf dd {
+    margin: 0.35rem 0 0 2.85rem;
+    color: var(--ink-soft);
+    font-size: 1.02rem;
+  }
+</style>

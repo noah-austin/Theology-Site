@@ -1,0 +1,61 @@
+---
+/**
+ * A boxed aside. Variants:
+ *  - note      general aside (lapis)
+ *  - take      "My take": where the author lands on a question (vermilion)
+ *  - scripture a key-text box (gold)
+ *  - caution   a warning or caveat (umber)
+ */
+interface Props {
+  variant?: 'note' | 'take' | 'scripture' | 'caution';
+  title?: string;
+}
+const { variant = 'note', title } = Astro.props;
+const defaults: Record<NonNullable<Props['variant']>, { title: string; glyph: string }> = {
+  note: { title: 'Note', glyph: '✦' },
+  take: { title: 'My take', glyph: '❧' },
+  scripture: { title: 'Key text', glyph: '✠' },
+  caution: { title: 'Caution', glyph: '※' },
+};
+const heading = title ?? defaults[variant].title;
+---
+
+<aside class:list={['callout', `callout--${variant}`]}>
+  <p class="callout-title">
+    <span class="glyph" aria-hidden="true">{defaults[variant].glyph}</span>
+    {heading}
+  </p>
+  <div class="callout-body"><slot /></div>
+</aside>
+
+<style>
+  .callout {
+    --c: var(--lapis);
+    margin: 1.75em 0;
+    padding: 1rem 1.25rem 1.1rem;
+    border: 1px solid color-mix(in srgb, var(--c) 45%, var(--rule));
+    border-left: 4px solid var(--c);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--c) 7%, var(--bg-elev));
+    font-size: 0.97em;
+  }
+  .callout--take { --c: var(--vermilion); }
+  .callout--scripture { --c: var(--gold); }
+  .callout--caution { --c: var(--umber); }
+  .callout-title {
+    margin: 0 0 0.4rem;
+    font-variant-caps: small-caps;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    color: var(--c);
+  }
+  .glyph {
+    margin-right: 0.35em;
+  }
+  .callout-body :global(p:last-child) {
+    margin-bottom: 0;
+  }
+  .callout-body :global(> * + *) {
+    margin-top: 0.75em;
+  }
+</style>

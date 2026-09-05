@@ -1,0 +1,183 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { url } from '@lib/url';
+const indexUrl = url('/search-index.json');
+---
+
+<BaseLayout title="Search" description="Search every entry and glossary term.">
+  <div class="container search-page">
+    <header class="head">
+      <h1>Search</h1>
+      <p class="description">Every entry, chart, and glossary term. Press <kbd>/</kbd> anywhere on the site to get here.</p>
+    </header>
+
+    <form class="search-form" role="search" action={url('/search/')} method="get">
+      <label class="visually-hidden" for="q">Search</label>
+      <input id="q" name="q" type="search" placeholder="Try “rapture”, “parousia”, or “Daniel”" autocomplete="off" autofocus />
+    </form>
+
+    <p class="status label" id="status" aria-live="polite">Loading index…</p>
+    <ol class="results" id="results"></ol>
+  </div>
+</BaseLayout>
+
+<script is:inline define:vars={{ indexUrl }}>
+  const input = document.getElementById('q');
+  const status = document.getElementById('status');
+  const results = document.getElementById('results');
+  let index = [];
+
+  const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const escape = (s) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+
+  function score(item, tokens) {
+    const title = norm(item.title);
+    const desc = norm(item.description);
+    const tags = norm(item.tags.join(' '));
+    const body = norm(item.body);
+    let total = 0;
+    for (const t of tokens) {
+      let s = 0;
+      if (title === t) s += 12;
+      else if (title.startsWith(t)) s += 8;
+      else if (title.includes(t)) s += 6;
+      if (tags.includes(t)) s += 4;
+      if (desc.includes(t)) s += 3;
+      if (body.includes(t)) s += 1;
+      if (s === 0) return 0; // every token must match somewhere
+      total += s;
+    }
+    return total;
+  }
+
+  function snippet(item, tokens) {
+    const text = item.body || item.description;
+    const lower = norm(text);
+    const idx = tokens.map((t) => lower.indexOf(t)).filter((i) => i >= 0).sort((a, b) => a - b)[0];
+    if (idx === undefined) return escape(item.description);
+    const start = Math.max(0, idx - 80);
+    const end = Math.min(text.length, idx + 160);
+    let out = escape((start > 0 ? '…' : '') + text.slice(start, end) + (end < text.length ? '…' : ''));
+    for (const t of tokens) {
+      out = out.replace(new RegExp(`(${t.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')})`, 'gi'), '<mark>$1</mark>');
+    }
+    return out;
+  }
+
+  function run() {
+    const q = norm(input.value.trim());
+    const tokens = q.split(/\s+/).filter(Boolean);
+    const params = new URL(location.href);
+    if (q) params.searchParams.set('q', input.value.trim());
+    else params.searchParams.delete('q');
+    history.replaceState(null, '', params);
+
+    if (!tokens.length) {
+      results.innerHTML = '';
+      status.textContent = `${index.length} items indexed. Start typing to search.`;
+      return;
+    }
+    const hits = index
+      .map((item) => ({ item, s: score(item, tokens) }))
+      .filter((h) => h.s > 0)
+      .sort((a, b) => b.s - a.s)
+      .slice(0, 50);
+    status.textContent = hits.length ? `${hits.length} result${hits.length === 1 ? '' : 's'}` : 'No results.';
+    results.innerHTML = hits
+      .map(
+        ({ item }) => `
+        <li class="result ${item.type}">
+          <span class="label">${escape(item.category)}</span>
+          <a class="title" href="${item.url}">${escape(item.title)}</a>
+          <p class="snippet">${snippet(item, tokens)}</p>
+        </li>`,
+      )
+      .join('');
+  }
+
+  fetch(indexUrl)
+    .then((r) => r.json())
+    .then((data) => {
+      index = data;
+      const q = new URLSearchParams(location.search).get('q');
+      if (q) input.value = q;
+      run();
+    })
+    .catch(() => {
+      status.textContent = 'Could not load the search index.';
+    });
+
+  input.addEventListener('input', run);
+  input.closest('form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    run();
+  });
+</script>
+
+<style>
+  .search-page {
+    max-width: var(--measure);
+    padding-top: 2rem;
+  }
+  .head h1 {
+    color: var(--vermilion);
+  }
+  .description {
+    color: var(--ink-soft);
+    margin-top: 0.5rem;
+  }
+  kbd {
+    border: 1px solid var(--rule-strong);
+    border-bottom-width: 2px;
+    border-radius: 3px;
+    padding: 0 0.4em;
+    background: var(--bg-elev);
+    font-size: 0.85em;
+  }
+  .search-form input {
+    width: 100%;
+    font: inherit;
+    font-size: 1.35rem;
+    padding: 0.6em 0.9em;
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+    color: var(--ink);
+    margin-top: 1rem;
+  }
+  .status {
+    margin: 1rem 0 0.5rem;
+  }
+  .results {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .results :global(.result) {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .results :global(.title) {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.45rem;
+    text-decoration: none;
+    color: var(--ink);
+    margin: 0.15rem 0 0.25rem;
+  }
+  .results :global(.title:hover) {
+    color: var(--vermilion);
+  }
+  .results :global(.snippet) {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 1rem;
+  }
+  .results :global(mark) {
+    background: color-mix(in srgb, var(--gold) 35%, transparent);
+    color: inherit;
+    padding: 0 0.1em;
+    border-radius: 2px;
+  }
+</style>

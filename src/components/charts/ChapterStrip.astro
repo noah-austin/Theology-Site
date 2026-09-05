@@ -1,0 +1,108 @@
+---
+/**
+ * A strip of numbered chapter boxes, colored and labelled by section.
+ * Good for showing the structure of a book at a glance.
+ */
+export interface Section {
+  label: string;
+  from: number;
+  to: number;
+  tone?: 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g';
+}
+interface Props {
+  title: string;
+  chapters: number;
+  sections: Section[];
+}
+const { title, chapters, sections } = Astro.props;
+
+const W = 1000;
+const PAD = 8;
+const BOX = (W - PAD * 2) / chapters;
+const TIER_H = 30;
+const TIERS = 3;
+const STRIP_Y = PAD + TIER_H * TIERS + 6;
+const BOX_H = 44;
+const H = STRIP_Y + BOX_H + PAD;
+
+const xOf = (ch: number) => PAD + (ch - 1) * BOX;
+const toneOf = (ch: number) => sections.find((s) => ch >= s.from && ch <= s.to)?.tone ?? 'a';
+
+// Stagger section labels across tiers so short sections don't collide.
+const laidOut = sections.map((s, i) => ({ ...s, tier: i % TIERS }));
+---
+
+<div class="strip" role="figure" aria-label={title}>
+  <svg viewBox={`0 0 ${W} ${H}`} xmlns="http://www.w3.org/2000/svg" font-family="var(--font-body)">
+    <title>{title}</title>
+    {laidOut.map((s) => {
+      const x0 = xOf(s.from);
+      const x1 = xOf(s.to) + BOX;
+      const yBase = PAD + s.tier * TIER_H;
+      const bracketY = STRIP_Y - 4;
+      return (
+        <g class={`section tone-${s.tone ?? 'a'}`}>
+          <path d={`M${x0 + 2},${bracketY} L${x0 + 2},${yBase + TIER_H - 6} L${x1 - 2},${yBase + TIER_H - 6} L${x1 - 2},${bracketY}`} class="bracket" />
+          <text x={(x0 + x1) / 2} y={yBase + TIER_H - 12} text-anchor="middle" class="section-label">{s.label}</text>
+        </g>
+      );
+    })}
+    {Array.from({ length: chapters }, (_, i) => i + 1).map((ch) => (
+      <g class={`box tone-${toneOf(ch)}`}>
+        <rect x={xOf(ch) + 1} y={STRIP_Y} width={BOX - 2} height={BOX_H} rx={2} />
+        <text x={xOf(ch) + BOX / 2} y={STRIP_Y + BOX_H / 2} text-anchor="middle" dominant-baseline="middle" class="ch">{ch}</text>
+      </g>
+    ))}
+  </svg>
+</div>
+
+<style>
+  .strip {
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+    padding: 0.5rem;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    min-width: 760px;
+    height: auto;
+  }
+  .bracket {
+    fill: none;
+    stroke-width: 1.25;
+  }
+  .section-label {
+    font-size: 12px;
+    font-variant-caps: small-caps;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+  }
+  .ch {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 16px;
+    fill: var(--ink);
+  }
+  .box rect {
+    stroke: var(--rule-strong);
+    stroke-width: 1;
+  }
+  .tone-a .bracket, .tone-a .section-label { stroke: var(--slate); fill: var(--slate); }
+  .tone-b .bracket, .tone-b .section-label { stroke: var(--lapis); fill: var(--lapis); }
+  .tone-c .bracket, .tone-c .section-label { stroke: var(--verdigris); fill: var(--verdigris); }
+  .tone-d .bracket, .tone-d .section-label { stroke: var(--gold); fill: var(--gold); }
+  .tone-e .bracket, .tone-e .section-label { stroke: var(--vermilion); fill: var(--vermilion); }
+  .tone-f .bracket, .tone-f .section-label { stroke: var(--plum); fill: var(--plum); }
+  .tone-g .bracket, .tone-g .section-label { stroke: var(--umber); fill: var(--umber); }
+  .bracket { fill: none !important; }
+  .box.tone-a rect { fill: color-mix(in srgb, var(--slate) 22%, var(--bg)); }
+  .box.tone-b rect { fill: color-mix(in srgb, var(--lapis) 22%, var(--bg)); }
+  .box.tone-c rect { fill: color-mix(in srgb, var(--verdigris) 22%, var(--bg)); }
+  .box.tone-d rect { fill: color-mix(in srgb, var(--gold) 28%, var(--bg)); }
+  .box.tone-e rect { fill: color-mix(in srgb, var(--vermilion) 22%, var(--bg)); }
+  .box.tone-f rect { fill: color-mix(in srgb, var(--plum) 22%, var(--bg)); }
+  .box.tone-g rect { fill: color-mix(in srgb, var(--umber) 22%, var(--bg)); }
+</style>

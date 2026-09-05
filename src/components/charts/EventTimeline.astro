@@ -1,0 +1,319 @@
+---
+/**
+ * A horizontal timeline that compares several views against one shared axis.
+ *
+ * Positions are percentages (0–100) along the axis.
+ *  - eras:    the labelled bands across the top (e.g. Church age, Tribulation)
+ *  - guides:  vertical dashed lines with a caption at the bottom
+ *  - rows:    one per view; each has spans (bars) and markers (arrows)
+ */
+export interface Era {
+  label: string;
+  sub?: string;
+  from: number;
+  to: number;
+  tone?: 'plain' | 'trib' | 'trib-dark' | 'wrath' | 'mill' | 'eternal';
+}
+export interface Span {
+  from: number;
+  to: number;
+  kind: 'earth' | 'heaven' | 'earth-dashed' | 'wrath';
+  label?: string;
+}
+export interface Marker {
+  at: number;
+  kind: 'rapture' | 'return' | 'judgment';
+  label?: string;
+  /** Nudge the label horizontally, in px. */
+  dx?: number;
+  labelPos?: 'above' | 'below';
+}
+export interface Row {
+  label: string;
+  sub?: string;
+  spans: Span[];
+  markers: Marker[];
+}
+export interface Guide {
+  at: number;
+  label: string;
+}
+interface Props {
+  title: string;
+  eras: Era[];
+  rows: Row[];
+  guides?: Guide[];
+  /** Hide the built-in legend when the surrounding text explains the symbols. */
+  legend?: boolean;
+}
+
+const { title, eras, rows, guides = [], legend = true } = Astro.props;
+
+const W = 1000;
+const LABEL_W = 210;
+const PAD_R = 16;
+const CHART_X = LABEL_W;
+const CHART_W = W - LABEL_W - PAD_R;
+const ERA_Y = 6;
+const ERA_H = 58;
+const ROWS_Y = ERA_Y + ERA_H + 14;
+const ROW_H = 66;
+const BAR_H = 12;
+const GUIDE_LABEL_H = 44;
+const rowsBottom = ROWS_Y + rows.length * ROW_H;
+const H = rowsBottom + (guides.length ? GUIDE_LABEL_H : 12);
+
+const x = (p: number) => CHART_X + (p / 100) * CHART_W;
+const cy = (i: number) => ROWS_Y + i * ROW_H + ROW_H / 2;
+
+const lines = (s: string) => s.split('\n');
+---
+
+<div class="timeline" role="figure" aria-label={title}>
+  <svg viewBox={`0 0 ${W} ${H}`} xmlns="http://www.w3.org/2000/svg" font-family="var(--font-body)">
+    <title>{title}</title>
+
+    {/* Row stripes */}
+    {rows.map((_, i) => (
+      <rect x={0} y={ROWS_Y + i * ROW_H} width={W} height={ROW_H} class={i % 2 ? 'stripe' : 'stripe alt'} />
+    ))}
+
+    {/* Eras */}
+    {eras.map((e) => {
+      const labelLines = lines(e.label);
+      const hasSub = Boolean(e.sub);
+      const startY = ERA_Y + ERA_H / 2 - ((labelLines.length - 1) * 14) / 2 - (hasSub ? 7 : 0);
+      return (
+        <g class={`era tone-${e.tone ?? 'plain'}`}>
+          <rect x={x(e.from)} y={ERA_Y} width={x(e.to) - x(e.from)} height={ERA_H} />
+          {labelLines.map((l, li) => (
+            <text x={(x(e.from) + x(e.to)) / 2} y={startY + li * 14} text-anchor="middle" dominant-baseline="middle" class="era-label">
+              {l}
+            </text>
+          ))}
+          {hasSub && (
+            <text x={(x(e.from) + x(e.to)) / 2} y={startY + labelLines.length * 14 + 1} text-anchor="middle" dominant-baseline="middle" class="era-sub">
+              {e.sub}
+            </text>
+          )}
+        </g>
+      );
+    })}
+
+    {/* Guides */}
+    {guides.map((g) => (
+      <g class="guide">
+        <line x1={x(g.at)} x2={x(g.at)} y1={ERA_Y + ERA_H} y2={rowsBottom + 6} />
+        {lines(g.label).map((l, li) => (
+          <text x={x(g.at)} y={rowsBottom + 20 + li * 13} text-anchor="middle" class="guide-label">
+            {l}
+          </text>
+        ))}
+      </g>
+    ))}
+
+    {/* Rows */}
+    {rows.map((row, i) => (
+      <g class="row">
+        {lines(row.label).map((l, li, arr) => (
+          <text
+            x={14}
+            y={cy(i) - (row.sub ? 7 : 0) - ((arr.length - 1) * 18) / 2 + li * 18}
+            dominant-baseline="middle"
+            class="row-label"
+          >
+            {l}
+          </text>
+        ))}
+        {row.sub && (
+          <text x={14} y={cy(i) + 12 + ((lines(row.label).length - 1) * 18) / 2} dominant-baseline="middle" class="row-sub">
+            {row.sub}
+          </text>
+        )}
+        <line x1={CHART_X} x2={W - PAD_R} y1={cy(i)} y2={cy(i)} class="baseline" />
+        {row.spans.map((s) => (
+          <g class={`span span-${s.kind}`}>
+            <rect x={x(s.from)} y={cy(i) - BAR_H / 2} width={Math.max(0, x(s.to) - x(s.from))} height={BAR_H} rx={2} />
+            {s.label && (
+              <text x={(x(s.from) + x(s.to)) / 2} y={cy(i) + BAR_H / 2 + 12} text-anchor="middle" class="span-label">
+                {s.label}
+              </text>
+            )}
+          </g>
+        ))}
+        {row.markers.map((m) => {
+          const mx = x(m.at);
+          const y = cy(i);
+          const pos = m.labelPos ?? (m.kind === 'return' ? 'below' : 'above');
+          const ly = pos === 'above' ? y - 21 : y + 29;
+          return (
+            <g class={`marker marker-${m.kind}`}>
+              {m.kind === 'rapture' && (
+                <path d={`M${mx},${y + 9} L${mx},${y - 15} M${mx - 5.5},${y - 8.5} L${mx},${y - 15} L${mx + 5.5},${y - 8.5}`} />
+              )}
+              {m.kind === 'return' && (
+                <path d={`M${mx},${y - 9} L${mx},${y + 15} M${mx - 5.5},${y + 8.5} L${mx},${y + 15} L${mx + 5.5},${y + 8.5}`} />
+              )}
+              {m.kind === 'judgment' && (
+                <path d={`M${mx},${y - 9} L${mx + 8},${y} L${mx},${y + 9} L${mx - 8},${y} Z`} />
+              )}
+              {m.label && (
+                <text x={mx + (m.dx ?? 0)} y={ly} text-anchor="middle" class="marker-label">
+                  {m.label}
+                </text>
+              )}
+            </g>
+          );
+        })}
+      </g>
+    ))}
+  </svg>
+
+  {legend && (
+    <ul class="legend" aria-label="Legend">
+      <li><span class="sw sw-earth"></span> Church on earth</li>
+      <li><span class="sw sw-heaven"></span> Church with Christ</li>
+      <li><span class="sw sw-earth-dashed"></span> Believers remaining</li>
+      <li><span class="sw sw-wrath"></span> Wrath of God poured out</li>
+      <li><span class="glyph up">↑</span> Rapture: church caught up</li>
+      <li><span class="glyph down">↓</span> Second Coming: Christ descends</li>
+    </ul>
+  )}
+</div>
+
+<style>
+  .timeline {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+    padding: 0.75rem 0.5rem 0.5rem;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    min-width: 760px;
+    height: auto;
+  }
+  text {
+    fill: var(--ink);
+  }
+  .stripe {
+    fill: transparent;
+  }
+  .stripe.alt {
+    fill: color-mix(in srgb, var(--bg-sunken) 55%, transparent);
+  }
+  .era rect {
+    stroke: var(--rule-strong);
+    stroke-width: 1;
+    fill: var(--bg);
+  }
+  .era.tone-trib rect { fill: var(--chart-trib); }
+  .era.tone-trib-dark rect { fill: var(--chart-trib-dark); }
+  .era.tone-wrath rect { fill: var(--chart-wrath); }
+  .era.tone-mill rect { fill: var(--chart-mill); }
+  .era.tone-eternal rect { fill: var(--bg-elev); }
+  .era-label {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .era-sub {
+    font-size: 11.5px;
+    fill: var(--ink-muted);
+    font-style: italic;
+  }
+  .guide line {
+    stroke: var(--chart-grid);
+    stroke-width: 1;
+    stroke-dasharray: 3 4;
+  }
+  .guide-label {
+    font-size: 11.5px;
+    fill: var(--ink-muted);
+    font-variant-caps: small-caps;
+    letter-spacing: 0.04em;
+  }
+  .row-label {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 17px;
+  }
+  .row-sub {
+    font-size: 11.5px;
+    fill: var(--ink-muted);
+    font-style: italic;
+  }
+  .baseline {
+    stroke: var(--rule);
+    stroke-width: 1;
+  }
+  .span-earth rect { fill: var(--chart-earth); }
+  .span-heaven rect { fill: var(--chart-heaven); }
+  .span-wrath rect { fill: var(--chart-wrath); }
+  .span-earth-dashed rect {
+    fill: none;
+    stroke: var(--chart-earth);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 3;
+  }
+  .span-label {
+    font-size: 11px;
+    fill: var(--ink-muted);
+    font-style: italic;
+  }
+  .marker path {
+    fill: none;
+    stroke-width: 2.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .marker-rapture path { stroke: var(--gold); }
+  .marker-return path { stroke: var(--vermilion); }
+  .marker-judgment path {
+    fill: var(--ink);
+    stroke: none;
+  }
+  .marker-label {
+    font-size: 11.5px;
+    font-weight: 600;
+  }
+  .marker-rapture .marker-label { fill: var(--gold); }
+  .marker-return .marker-label { fill: var(--vermilion); }
+
+  .legend {
+    list-style: none;
+    margin: 0.75rem 0 0;
+    padding: 0.6rem 0.5rem 0.2rem;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.5rem;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+  .legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+  .sw {
+    display: inline-block;
+    width: 1.6em;
+    height: 0.65em;
+    border-radius: 2px;
+  }
+  .sw-earth { background: var(--chart-earth); }
+  .sw-heaven { background: var(--chart-heaven); }
+  .sw-wrath { background: var(--chart-wrath); }
+  .sw-earth-dashed { border: 1.5px dashed var(--chart-earth); }
+  .glyph {
+    font-weight: 700;
+    font-size: 1.2em;
+    line-height: 1;
+  }
+  .glyph.up { color: var(--gold); }
+  .glyph.down { color: var(--vermilion); }
+</style>

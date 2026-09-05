@@ -1,0 +1,66 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import EntryCard from '@components/EntryCard.astro';
+import { getPublishedEntries } from '@lib/entries';
+import { slugifyTag, url } from '@lib/url';
+
+export async function getStaticPaths() {
+  const entries = await getPublishedEntries();
+  const byTag = new Map<string, { tag: string; entries: typeof entries }>();
+  for (const e of entries) {
+    for (const t of e.data.tags) {
+      const slug = slugifyTag(t);
+      const bucket = byTag.get(slug) ?? { tag: t, entries: [] };
+      bucket.entries.push(e);
+      byTag.set(slug, bucket);
+    }
+  }
+  return [...byTag.entries()].map(([slug, props]) => ({ params: { tag: slug }, props }));
+}
+
+const { tag, entries } = Astro.props;
+---
+
+<BaseLayout title={`Tagged “${tag}”`} description={`Entries tagged ${tag}.`}>
+  <div class="container page">
+    <nav class="label crumbs" aria-label="Breadcrumb">
+      <a href={url('/')}>Directory</a>
+      <span aria-hidden="true">›</span>
+      <a href={url('/tags/')}>Tags</a>
+      <span aria-hidden="true">›</span>
+      <span aria-current="page">{tag}</span>
+    </nav>
+    <h1><span class="label">Tagged</span> {tag}</h1>
+    <p class="description">{entries.length} {entries.length === 1 ? 'entry' : 'entries'}</p>
+    <div class="list">
+      {entries.map((entry) => <EntryCard entry={entry} showCategory />)}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-top: 1.5rem;
+  }
+  .crumbs {
+    display: flex;
+    gap: 0.6em;
+    margin-bottom: 1.25rem;
+  }
+  h1 {
+    color: var(--vermilion);
+  }
+  h1 .label {
+    display: block;
+    font-size: 1rem;
+  }
+  .description {
+    color: var(--ink-muted);
+    margin: 0.5rem 0 1.5rem;
+  }
+  .list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+    gap: 1rem;
+  }
+</style>

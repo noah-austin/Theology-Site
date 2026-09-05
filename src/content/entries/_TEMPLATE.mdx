@@ -1,0 +1,41 @@
+---
+# Copy this file into a category folder and rename it. The file name becomes the URL.
+# Files starting with an underscore are ignored by the build.
+title: 'Entry Title'
+description: 'One or two sentences. Shown on cards, in search results, and as the lede at the top of the page.'
+category: notes            # must match the folder: timelines | views-and-positions | charts-and-diagrams | word-studies | books-and-sermons | notes
+tags: [example]
+date: 2026-01-01           # when written
+# updated: 2026-02-01      # when meaningfully revised (optional)
+# featured: true           # bigger card on the home page (optional)
+# order: 1                 # manual sort within the category; lower first (optional)
+# draft: true              # hides the entry from listings and search in production (optional)
+sources:                   # optional; rendered as a list at the bottom
+  - label: 'Book or article title'
+    note: 'Author (Publisher, year)'
+  # - label: 'A web page'
+  #   url: 'https://example.com'
+---
+
+import Callout from '@components/Callout.astro';
+import Scripture from '@components/Scripture.astro';
+import Figure from '@components/Figure.astro';
+{/* Charts: EventTimeline, SequenceChart, ChapterStrip live in @components/charts/ */}
+
+Opening paragraph. The first letter gets a drop cap automatically.
+
+## A section
+
+Markdown works as usual: **bold**, *italic*, lists, links, and tables. Wide tables scroll sideways on small screens.
+
+<Scripture ref="John 1:1">
+  <p>"In the beginning was the Word…"</p>
+</Scripture>
+
+<Callout variant="note" title="Optional title">
+  <p>Variants: <code>note</code>, <code>take</code> (my take), <code>scripture</code>, <code>caution</code>.</p>
+</Callout>
+
+<Callout variant="take">
+  <p>Where I land on this, kept separate from the summary above.</p>
+</Callout>
