@@ -626,3 +626,40 @@ a.card:hover h3 {
 .prose :lang(he) {
   font-size: 1.08em;
 }
+
+/* --------------------------------------------------------------------------
+   Phones and touch
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 640px) {
+  /* Comparison grids scroll sideways rather than squeezing to one word per line */
+  .table-wrap {
+    overscroll-behavior-x: contain;
+    /* fade the right edge to hint that there is more */
+    mask-image: linear-gradient(to right, black calc(100% - 2rem), transparent);
+    padding-right: 2rem;
+  }
+  .table-wrap th,
+  .table-wrap td {
+    min-width: 9rem;
+  }
+  .table-wrap td:first-child,
+  .table-wrap th:first-child {
+    min-width: 6rem;
+    max-width: 8rem;
+  }
+  .prose {
+    font-size: 1.1rem;
+  }
+}
+
+@media (pointer: coarse) {
+  .tag {
+    font-size: 0.85rem;
+    padding: 0.5em 0.75em 0.55em;
+  }
+  .button,
+  .expand {
+    min-height: 2.5rem;
+  }
+}

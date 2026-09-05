@@ -1,0 +1,207 @@
+---
+/**
+ * Wraps a wide SVG chart. On screens narrower than the chart it scrolls
+ * sideways, shows a fade on the overflowing edge and a swipe hint, and offers
+ * a full-screen view where the chart can be studied at a larger size.
+ */
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+
+<div class="chart-scroller" data-scroller>
+  <div class="chart-scroller-track" data-scroller-track tabindex="0" role="figure" aria-label={title}>
+    <slot />
+  </div>
+  <div class="chart-scroller-bar" data-scroller-bar hidden>
+    <span class="hint label">Swipe sideways to see the whole chart</span>
+    <button type="button" class="expand" data-scroller-expand>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+      </svg>
+      Full screen
+    </button>
+  </div>
+</div>
+
+<style>
+  .chart-scroller {
+    position: relative;
+  }
+  .chart-scroller-track {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+  }
+  .chart-scroller-track :global(svg) {
+    display: block;
+    width: 100%;
+    min-width: 760px;
+    height: auto;
+  }
+  /* Fade on the edges that still have content hidden beyond them */
+  .chart-scroller[data-overflow='true']::before,
+  .chart-scroller[data-overflow='true']::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2.5rem;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 150ms ease;
+  }
+  .chart-scroller::before {
+    left: 0;
+    background: linear-gradient(to right, var(--bg-elev), transparent);
+  }
+  .chart-scroller::after {
+    right: 0;
+    background: linear-gradient(to left, var(--bg-elev), transparent);
+  }
+  .chart-scroller[data-overflow='true']:not([data-at-start='true'])::before,
+  .chart-scroller[data-overflow='true']:not([data-at-end='true'])::after {
+    opacity: 1;
+  }
+  .chart-scroller-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0.25rem 0;
+    position: relative;
+    z-index: 2;
+  }
+  .hint {
+    font-size: 0.85rem;
+  }
+  .expand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    font-size: 0.85rem;
+    font-variant-caps: small-caps;
+    letter-spacing: 0.06em;
+    padding: 0.45em 0.8em;
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+    color: var(--ink-soft);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .expand:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+</style>
+
+<style is:global>
+  /* Full-screen chart viewer (created on demand by the script below) */
+  .chart-dialog {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    width: 100vw;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    background: var(--bg-elev);
+    color: var(--ink);
+  }
+  .chart-dialog::backdrop {
+    background: rgb(0 0 0 / 0.5);
+  }
+  .chart-dialog .viewer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .chart-dialog .viewer-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.6rem 0.9rem;
+    border-bottom: 1px solid var(--rule);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  .chart-dialog .viewer-head button {
+    font: inherit;
+    font-size: 0.9rem;
+    font-family: var(--font-body);
+    font-variant-caps: small-caps;
+    letter-spacing: 0.06em;
+    padding: 0.4em 0.9em;
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .chart-dialog .viewer-body {
+    flex: 1;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 1rem;
+  }
+  .chart-dialog .viewer-body svg {
+    display: block;
+    width: max(100%, 1000px);
+    max-width: none;
+    height: auto;
+  }
+  .chart-dialog .viewer-foot {
+    padding: 0.5rem 0.9rem;
+    border-top: 1px solid var(--rule);
+    font-size: 0.85rem;
+    color: var(--ink-muted);
+    font-style: italic;
+  }
+</style>
+
+<script>
+  function setup(scroller: HTMLElement) {
+    const track = scroller.querySelector<HTMLElement>('[data-scroller-track]');
+    const bar = scroller.querySelector<HTMLElement>('[data-scroller-bar]');
+    const expand = scroller.querySelector<HTMLButtonElement>('[data-scroller-expand]');
+    if (!track || !bar) return;
+
+    const update = () => {
+      const overflow = track.scrollWidth > track.clientWidth + 2;
+      scroller.dataset.overflow = String(overflow);
+      scroller.dataset.atStart = String(track.scrollLeft <= 1);
+      scroller.dataset.atEnd = String(track.scrollLeft + track.clientWidth >= track.scrollWidth - 1);
+      bar.hidden = !overflow;
+    };
+    track.addEventListener('scroll', update, { passive: true });
+    new ResizeObserver(update).observe(track);
+    update();
+
+    expand?.addEventListener('click', () => {
+      const svg = track.querySelector('svg');
+      if (!svg) return;
+      const dialog = document.createElement('dialog');
+      dialog.className = 'chart-dialog';
+      const title = track.getAttribute('aria-label') ?? 'Chart';
+      dialog.innerHTML = `
+        <div class="viewer">
+          <div class="viewer-head"><span></span><button type="button" data-close>Close</button></div>
+          <div class="viewer-body"></div>
+          <div class="viewer-foot">Drag to pan. Turn your phone sideways for a wider view.</div>
+        </div>`;
+      dialog.querySelector('.viewer-head span')!.textContent = title;
+      dialog.querySelector('.viewer-body')!.appendChild(svg.cloneNode(true));
+      dialog.querySelector('[data-close]')!.addEventListener('click', () => dialog.close());
+      dialog.addEventListener('close', () => dialog.remove());
+      document.body.appendChild(dialog);
+      dialog.showModal();
+    });
+  }
+  document.querySelectorAll<HTMLElement>('[data-scroller]').forEach(setup);
+</script>

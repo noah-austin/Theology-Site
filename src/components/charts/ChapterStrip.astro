@@ -1,4 +1,5 @@
 ---
+import ChartScroller from './ChartScroller.astro';
 /**
  * A strip of numbered chapter boxes, colored and labelled by section.
  * Good for showing the structure of a book at a glance.
@@ -32,7 +33,8 @@ const toneOf = (ch: number) => sections.find((s) => ch >= s.from && ch <= s.to)?
 const laidOut = sections.map((s, i) => ({ ...s, tier: i % TIERS }));
 ---
 
-<div class="strip" role="figure" aria-label={title}>
+<div class="strip">
+  <ChartScroller title={title}>
   <svg viewBox={`0 0 ${W} ${H}`} xmlns="http://www.w3.org/2000/svg" font-family="var(--font-body)">
     <title>{title}</title>
     {laidOut.map((s) => {
@@ -54,21 +56,15 @@ const laidOut = sections.map((s, i) => ({ ...s, tier: i % TIERS }));
       </g>
     ))}
   </svg>
+  </ChartScroller>
 </div>
 
 <style>
   .strip {
-    overflow-x: auto;
     border: 1px solid var(--rule);
     border-radius: var(--radius);
     background: var(--bg-elev);
     padding: 0.5rem;
-  }
-  svg {
-    display: block;
-    width: 100%;
-    min-width: 760px;
-    height: auto;
   }
   .bracket {
     fill: none;

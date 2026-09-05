@@ -38,6 +38,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta name="author" content={SITE.author} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
+    <link rel="apple-touch-icon" href={url('/apple-touch-icon.png')} />
+    <link rel="manifest" href={url('/manifest.webmanifest')} />
+    <meta name="apple-mobile-web-app-title" content={SITE.name} />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={SITE.name} />
     <meta property="og:title" content={fullTitle} />

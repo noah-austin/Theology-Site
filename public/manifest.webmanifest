@@ -1,0 +1,15 @@
+{
+  "name": "Commonplace",
+  "short_name": "Commonplace",
+  "description": "A commonplace book of theology: timelines, charts, word studies, and notes.",
+  "start_url": "/Theology-Site/",
+  "scope": "/Theology-Site/",
+  "display": "standalone",
+  "background_color": "#f4ecd9",
+  "theme_color": "#f4ecd9",
+  "icons": [
+    { "src": "/Theology-Site/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/Theology-Site/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/Theology-Site/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

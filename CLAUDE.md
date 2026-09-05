@@ -17,7 +17,9 @@ layout and the content workflow. This file records the conventions that are not 
 - **Sources** go in the `sources` front-matter array (label + optional url/note), not in prose.
 - **Charts** are server-rendered SVG components in `src/components/charts/`. Put large chart data in
   `src/data/charts/<name>.ts` and import it. Charts use CSS variables so they follow the theme; do not
-  hard-code colors. Wrap charts in `<Figure wide caption="…">`.
+  hard-code colors. Wrap charts in `<Figure wide caption="…">`. Each chart's SVG sits inside
+  `ChartScroller`, which handles sideways scrolling, the swipe hint, and the full-screen view on phones;
+  new chart components should use it too.
 - **Design.** Manuscript aesthetic: parchment/ink in light mode, candlelit dark mode. Tokens live in
   `src/styles/global.css`; category accents are `--vermilion`, `--lapis`, `--gold`, `--verdigris`,
   `--plum`, `--umber`, `--slate`. Use the tokens rather than new colors.

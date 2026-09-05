@@ -175,6 +175,11 @@ const grouped = letters.map((letter) => ({
     padding: 0.1em 0.4em;
     border-radius: 3px;
   }
+  @media (pointer: coarse) {
+    .letters a {
+      padding: 0.3em 0.55em;
+    }
+  }
   .letters a:hover {
     color: var(--accent);
     background: var(--bg-sunken);
