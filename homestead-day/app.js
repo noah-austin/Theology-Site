@@ -293,12 +293,12 @@
       { x: 30, n: 'Kyle', s: 'coffee' }, { x: 120, n: 'Austin' }, { x: 210, n: 'Round Rock' },
       { x: 320, n: 'Temple' }, { x: 430, n: 'Waco' }, { x: 520, n: 'Elm Mott', s: 'exit 343' },
     ];
-    return `<svg class="route" viewBox="0 0 560 78" role="img" aria-label="Route along I‑35 from Kyle to Elm Mott">
+    return `<svg class="route" viewBox="0 0 560 84" role="img" aria-label="Route along I‑35 from Kyle to Elm Mott">
       <path class="road" d="M 30 40 C 90 30, 150 50, 210 40 S 330 30, 430 40 S 500 46, 530 40" />
       <text class="hwy" x="270" y="28" text-anchor="middle">I‑35 north · about 2¼ hours</text>
       ${towns.map((t) => `<circle class="town ${t.n === 'Elm Mott' ? 'dest' : ''}" cx="${t.x}" cy="40" r="${t.n === 'Elm Mott' ? 6 : 4}" />
-        <text x="${t.x}" y="62" text-anchor="middle">${t.n}</text>
-        ${t.s ? `<text class="sub" x="${t.x}" y="74" text-anchor="middle">${t.s}</text>` : ''}`).join('')}
+        <text x="${t.x}" y="64" text-anchor="middle">${t.n}</text>
+        ${t.s ? `<text class="sub" x="${t.x}" y="79" text-anchor="middle">${t.s}</text>` : ''}`).join('')}
     </svg>`;
   }
 
