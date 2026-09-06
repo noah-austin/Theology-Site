@@ -27,12 +27,13 @@
         'Turn left on Halbert Lane and follow it through the Brazos de Dios entrance.',
       ],
       map: true },
-    { id: 'waffles', time: '~12:00', title: 'Waffles at Café Homestead',
-      body: 'The café opens at 11. Their breakfast menu runs to a cornmeal‑and‑bacon waffle with fried chicken, eggs, maple syrup, and cream gravy. Nobody has to order that. Someone should.' },
+    { id: 'waffles', time: '~12:00', title: 'Waffles at Waco Waffle Co.',
+      body: '224 Halbert Ln, on the Homestead grounds, in a restored 1700s timber‑frame house with its own water wheel. Open 7:30 to 2:30. Sweet: the University (peanut butter, banana, chocolate, caramel) or the Webster (strawberries, Nutella, cream). Savory: the Silo, a jalapeño‑cheddar waffle with fried chicken, egg, turkey bacon, and avocado. Nobody has to order the Silo. Someone should.',
+      link: { label: 'Waco Waffle menu', href: 'https://www.wacowaffle.com/' } },
     { id: 'explore', time: '12:45 to 2:30', title: 'Explore',
       body: 'This is the open part of the day. Pick what sounds good; the app adds up the minutes and tells you whether you are being realistic.',
       options: true },
-    { id: 'lunch', time: '2:30', title: 'Late lunch at the café',
+    { id: 'lunch', time: '2:30', title: 'Late lunch at Café Homestead',
       body: 'Café Homestead’s kitchen closes at 3 on Mondays, so be seated by 2:30. The Tea House in the Gristmill is the lighter alternative if the café is slammed. Order pie “to share.” Watch what happens.' },
     { id: 'home', time: '3:30', title: 'Homeward',
       body: 'The village closes at 5 but you will be gone. Reverse the directions, argue about the DJ again. The Trip Report generates itself under More. Someone will nap in the car (−1).' },
@@ -98,6 +99,8 @@
     'Someone learns what a gristmill actually does',
     'Someone says “this is so much better than a screen”',
     'Someone orders Moon Milk and regrets nothing',
+    'Someone orders the Silo and cannot finish it',
+    'Someone photographs the waffle before eating it',
     'Blake asks the blacksmith a question',
     'Megan photographs something nobody else noticed',
     'Jill says “we should get one of these”',
@@ -128,6 +131,7 @@
     { id: 'fiber', name: 'Fiber Crafts', note: 'Spinning, weaving, quilting.' },
     { id: 'basket', name: 'Basketry', note: 'Woven by hand, held together by patience.' },
     { id: 'cheese', name: 'Cheese', note: 'Judge harshly. This is the one that matters.' },
+    { id: 'waffle', name: 'Waco Waffle Co.', note: 'Waffles in a timber‑frame house. Rate the waffle, not the house.' },
     { id: 'cafe', name: 'Café Homestead', note: 'Lunch. Pie. The rating that ends friendships.' },
     { id: 'giftbarn', name: 'Gift Barn', note: 'Where resolve goes to be tested.' },
     { id: 'grounds', name: 'Grounds & Animals', note: 'The barn, the fields, whatever stared at you.' },
@@ -321,7 +325,8 @@
           <dt>Where</dt><dd>608 Dry Creek Rd, Waco, TX 76705 (Elm Mott)</dd>
           <dt>Village</dt><dd>Mon–Sat 10–5, closed Sunday</dd>
           <dt>Gristmill</dt><dd>Mon–Sat 9–5</dd>
-          <dt>Café</dt><dd>Mon 11–3 (Café Homestead)</dd>
+          <dt>Waffles</dt><dd>Waco Waffle Co., Mon 7:30–2:30</dd>
+          <dt>Café</dt><dd>Café Homestead, Mon 11–3</dd>
           <dt>Labor Day</dt><dd>Regular hours are expected, but the village has run a festival on Labor Day Monday before, so hours and crowds may differ. Confirm at <a href="tel:+12547549600">(254) 754‑9600</a>.</dd>
         </dl>
       </div>
@@ -876,6 +881,7 @@
         <li>Added the Martins. Added Summer Moon. Added Austins vs. Martins.</li>
         <li>Added directions and a map, per the spec “whatever looks best.”</li>
         <li>The Explore stop now adds up minutes and passes judgment.</li>
+        <li>Waffles corrected to Waco Waffle Co., which turns out to be on the Homestead grounds.</li>
       </ul></div>
       <div class="release"><h3>1.0.0 · Waco</h3><ul>
         <li>Initial release. Contains everything.</li>
