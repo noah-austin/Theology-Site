@@ -5,7 +5,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.0';
+  const VERSION = '1.1.0';
   const STORE_KEY = 'homesteados.v1';
 
   /* ------------------------------------------------------------------
@@ -13,25 +13,45 @@
      ------------------------------------------------------------------ */
 
   const STOPS = [
-    { id: 'depart', time: 'Morning', title: 'Departure',
-      body: 'Everyone in the car. Bathroom before, not after. Water bottles. Charged phones; this app has needs.',
-      tip: 'Village is open Mon–Sat 10–5 and closed Sundays. Holiday hours can differ, so check homesteadheritage.com before pulling out.' },
-    { id: 'drive', time: 'I‑35 north', title: 'The Drive',
-      body: 'Homestead Heritage, 608 Dry Creek Rd, Waco, TX 76705, up in Elm Mott. Assign a DJ. Argue about the DJ.',
-      link: { label: 'Open in Maps', href: 'https://maps.apple.com/?q=608+Dry+Creek+Rd,+Waco,+TX+76705' } },
-    { id: 'giftbarn', time: 'Arrival', title: 'Gift Barn & Orientation',
-      body: 'Get the lay of the land, grab a map, and buy nothing yet. (See Scoreboard: “Resisted a purchase,” +3.)' },
-    { id: 'gristmill', time: 'Late morning', title: 'The Gristmill',
-      body: 'A timber‑frame mill from around 1760, rebuilt here and actually grinding. Watch the process, take the samples, find the cider mill and tea room. Someone will learn what a gristmill does; that is a Bingo square.' },
-    { id: 'village', time: 'Before lunch', title: 'Crafts Village Loop',
-      body: 'The Potter’s House, the woodworking shop, the forge, fiber crafts, basketry, cheese. Demonstrations happen when they happen. Ask the artisan a real question (+5).' },
-    { id: 'lunch', time: 'Midday', title: 'Café Homestead',
-      body: 'Lunch, farm to table. Order the pie “to share.” Watch what happens.' },
-    { id: 'afternoon', time: 'Afternoon', title: 'Second Pass & the Animals',
-      body: 'Whatever got missed, plus the grounds, the animals, and the barn that is older than Texas.' },
-    { id: 'home', time: 'Evening', title: 'Homeward',
-      body: 'The Trip Report generates itself under More. Someone will nap in the car (−1).' },
+    { id: 'pickup', time: '9:00', title: 'Austins collect the Martins',
+      body: 'Noah and Jill pick up Blake and Megan. Bathroom before, not after. Water bottles. Charged phones; this app has needs.' },
+    { id: 'coffee', time: '9:20', title: 'Summer Moon, Kyle',
+      body: '4217 Benner Rd #400, Kyle. Wood‑fired coffee and Moon Milk, which is sweet cream with a cult following. Order for the car; the drive is long.',
+      link: { label: 'Open Summer Moon in Maps', href: 'https://www.google.com/maps/search/?api=1&query=Summer+Moon+Coffee+4217+Benner+Rd+Kyle+TX+78640' } },
+    { id: 'drive', time: '9:45 · about 2¼ hours', title: 'The Drive',
+      body: 'I‑35 north the whole way: through Austin, past Temple, past Waco. Assign a DJ. Argue about the DJ.',
+      directions: [
+        'Take I‑35 north to exit 343 (Elm Mott, FM 308).',
+        'Go west on FM 308 for 3.1 miles to the flashing light at FM 933.',
+        'Turn right (north) on FM 933 for 1.6 miles.',
+        'Turn left on Halbert Lane and follow it through the Brazos de Dios entrance.',
+      ],
+      map: true },
+    { id: 'waffles', time: '~12:00', title: 'Waffles at Café Homestead',
+      body: 'The café opens at 11. Their breakfast menu runs to a cornmeal‑and‑bacon waffle with fried chicken, eggs, maple syrup, and cream gravy. Nobody has to order that. Someone should.' },
+    { id: 'explore', time: '12:45 to 2:30', title: 'Explore',
+      body: 'This is the open part of the day. Pick what sounds good; the app adds up the minutes and tells you whether you are being realistic.',
+      options: true },
+    { id: 'lunch', time: '2:30', title: 'Late lunch at the café',
+      body: 'Café Homestead’s kitchen closes at 3 on Mondays, so be seated by 2:30. The Tea House in the Gristmill is the lighter alternative if the café is slammed. Order pie “to share.” Watch what happens.' },
+    { id: 'home', time: '3:30', title: 'Homeward',
+      body: 'The village closes at 5 but you will be gone. Reverse the directions, argue about the DJ again. The Trip Report generates itself under More. Someone will nap in the car (−1).' },
   ];
+
+  const EXPLORE = [
+    { id: 'gristmill', name: 'Homestead Gristmill', min: 30, note: 'Watch the c. 1760 mill grind; samples in the store.' },
+    { id: 'teahouse', name: 'Tea House & cider mill', min: 20, note: 'Inside the Gristmill. Cider, tea, a sit‑down.' },
+    { id: 'pottery', name: 'The Potter’s House', min: 20, note: 'Wheel demonstrations when the potter is at it.' },
+    { id: 'wood', name: 'Woodworking shop', min: 20, note: 'Hand‑cut joinery and the furniture showroom.' },
+    { id: 'forge', name: 'The Forge', min: 20, note: 'Blacksmithing. Stand back, then lean in.' },
+    { id: 'fiber', name: 'Fiber crafts', min: 15, note: 'Spinning, weaving, quilting.' },
+    { id: 'basket', name: 'Basketry', min: 15, note: 'Woven by hand, held together by patience.' },
+    { id: 'cheese', name: 'Cheese', min: 15, note: 'Award‑winning, sampled, judged.' },
+    { id: 'giftbarn', name: 'Gift Barn', min: 20, note: 'Where resolve goes to be tested.' },
+    { id: 'grounds', name: 'Grounds, barn & animals', min: 30, note: 'The 200‑year‑old barn and whatever is grazing.' },
+    { id: 'herbs', name: 'Herb garden', min: 10, note: 'A quiet loop. Smell things.' },
+  ];
+  const EXPLORE_WINDOW = 105; // minutes between waffles and late lunch
 
   const BINGO_POOL = [
     'Someone in a bonnet or suspenders',
@@ -71,12 +91,18 @@
     'Someone tries to pet something that walks away',
     'Someone finds the restroom without the app',
     'Someone says “heritage” unironically',
-    'The group splits and reunites at the café',
+    'The Martins and the Austins split up and reunite at the café',
     'Someone asks the price of a whole wheel of cheese',
     'A phone dies before 2 pm',
     '“We should come back for the fair”',
     'Someone learns what a gristmill actually does',
     'Someone says “this is so much better than a screen”',
+    'Someone orders Moon Milk and regrets nothing',
+    'Blake asks the blacksmith a question',
+    'Megan photographs something nobody else noticed',
+    'Jill says “we should get one of these”',
+    'Someone says the app was made “for everything”',
+    'Someone is still holding a Summer Moon cup at the gristmill',
   ];
 
   const PRESETS = [
@@ -131,7 +157,8 @@
     ratings: {},              // playerId -> shopId -> {n, ts}
     notes: {},                // stopId -> {text, ts}
     done: [],                 // stop ids completed
-    now: 'depart',            // current stop
+    plan: [],                 // chosen explore option ids
+    now: 'pickup',            // current stop
     settings: { sabbath: true, haptics: true, push: false },
     setup: false,
   });
@@ -147,6 +174,14 @@
   }
   function save() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch (e) { /* private mode, etc. */ }
+  }
+
+  const HOUSEHOLDS = { Austins: ['noah', 'jill'], Martins: ['blake', 'megan'] };
+  function householdTotals(board) {
+    return Object.entries(HOUSEHOLDS).map(([name, ids]) => ({
+      name, pts: board.filter((r) => ids.includes(r.p.id)).reduce((a, r) => a + r.pts, 0),
+      present: board.some((r) => ids.includes(r.p.id)),
+    })).filter((h) => h.present);
   }
 
   const uid = () => Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-3);
@@ -252,24 +287,47 @@
      Day view
      ------------------------------------------------------------------ */
 
+  function routeStrip() {
+    // The pilgrim's road: I-35 from Kyle to Elm Mott, as a manuscript would draw it.
+    const towns = [
+      { x: 30, n: 'Kyle', s: 'coffee' }, { x: 120, n: 'Austin' }, { x: 210, n: 'Round Rock' },
+      { x: 320, n: 'Temple' }, { x: 430, n: 'Waco' }, { x: 520, n: 'Elm Mott', s: 'exit 343' },
+    ];
+    return `<svg class="route" viewBox="0 0 560 78" role="img" aria-label="Route along I‑35 from Kyle to Elm Mott">
+      <path class="road" d="M 30 40 C 90 30, 150 50, 210 40 S 330 30, 430 40 S 500 46, 530 40" />
+      <text class="hwy" x="270" y="28" text-anchor="middle">I‑35 north · about 2¼ hours</text>
+      ${towns.map((t) => `<circle class="town ${t.n === 'Elm Mott' ? 'dest' : ''}" cx="${t.x}" cy="40" r="${t.n === 'Elm Mott' ? 6 : 4}" />
+        <text x="${t.x}" y="62" text-anchor="middle">${t.n}</text>
+        ${t.s ? `<text class="sub" x="${t.x}" y="74" text-anchor="middle">${t.s}</text>` : ''}`).join('')}
+    </svg>`;
+  }
+
   function renderDay() {
     const root = $('#view-day');
-    const nowIdx = STOPS.findIndex((s) => s.id === S.now);
-    const dateStr = new Date().toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+    const d = new Date();
+    const dateStr = d.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+    const isSunday = d.getDay() === 0;
+    const planMin = EXPLORE.filter((o) => S.plan.includes(o.id)).reduce((a, o) => a + o.min, 0);
+    const verdict = !S.plan.length ? 'Nothing picked yet. The gristmill is the safe first choice.'
+      : planMin <= EXPLORE_WINDOW - 20 ? `${planMin} minutes picked for a ${EXPLORE_WINDOW}‑minute window. Comfortable. Add something.`
+      : planMin <= EXPLORE_WINDOW ? `${planMin} minutes picked for a ${EXPLORE_WINDOW}‑minute window. Tight but honest.`
+      : `${planMin} minutes picked for a ${EXPLORE_WINDOW}‑minute window. This is a family, not a schedule; something gives.`;
     root.innerHTML = `
       <h2>The Day</h2>
-      <p class="view-intro">${esc(dateStr)}. Tap a stop to make it the current one; tap it again to mark it done.${S.settings.sabbath && new Date().getDay() === 0 ? ' It is Sunday, so the village is closed. Sabbath mode has done its one job.' : ''}</p>
+      <p class="view-intro">${esc(dateStr)}. Tap a stop to make it the current one; tap it again to mark it done.${S.settings.sabbath && isSunday ? ' It is Sunday, so the village is closed. Sabbath mode has done its one job.' : ''}</p>
       <div class="card">
         <span class="rubric">Homestead Heritage</span>
         <dl class="hours">
           <dt>Where</dt><dd>608 Dry Creek Rd, Waco, TX 76705 (Elm Mott)</dd>
           <dt>Village</dt><dd>Mon–Sat 10–5, closed Sunday</dd>
           <dt>Gristmill</dt><dd>Mon–Sat 9–5</dd>
-          <dt>Holidays</dt><dd>Hours can differ. <a href="https://www.homesteadheritage.com/" target="_blank" rel="noopener">Check the site</a> before leaving.</dd>
+          <dt>Café</dt><dd>Mon 11–3 (Café Homestead)</dd>
+          <dt>Labor Day</dt><dd>Regular hours are expected, but the village has run a festival on Labor Day Monday before, so hours and crowds may differ. Confirm at <a href="tel:+12547549600">(254) 754‑9600</a>.</dd>
         </dl>
       </div>
+      ${routeStrip()}
       <ol class="stops">
-        ${STOPS.map((s, i) => {
+        ${STOPS.map((s) => {
           const done = S.done.includes(s.id);
           const isNow = s.id === S.now;
           const note = (S.notes[s.id] || {}).text || '';
@@ -280,7 +338,14 @@
               ${isNow ? '<span class="pill now">Now</span>' : done ? '<span class="pill">Done</span>' : ''}
             </div>
             <p class="stop-body">${esc(s.body)}</p>
-            ${s.tip ? `<p class="fine">${esc(s.tip)}</p>` : ''}
+            ${s.directions ? `<ol class="directions">${s.directions.map((x) => `<li>${esc(x)}</li>`).join('')}</ol>` : ''}
+            ${s.map ? `<div class="map-wrap"><iframe class="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Map to Homestead Heritage" src="https://www.google.com/maps?q=Homestead+Heritage,+608+Dry+Creek+Rd,+Waco,+TX+76705&z=9&output=embed"></iframe></div>
+              <div class="btn-row">
+                <a class="btn small primary" href="https://www.google.com/maps/dir/?api=1&destination=Homestead+Heritage,+608+Dry+Creek+Rd,+Waco,+TX+76705&waypoints=Summer+Moon+Coffee,+4217+Benner+Rd,+Kyle,+TX+78640&travelmode=driving" target="_blank" rel="noopener">Directions via Summer Moon</a>
+                <a class="btn small" href="https://maps.apple.com/?daddr=608+Dry+Creek+Rd,+Waco,+TX+76705&dirflg=d" target="_blank" rel="noopener">Apple Maps</a>
+              </div>` : ''}
+            ${s.options ? `<ul class="options">${EXPLORE.map((o) => `<li><label class="opt ${S.plan.includes(o.id) ? 'on' : ''}"><input type="checkbox" data-opt="${o.id}" ${S.plan.includes(o.id) ? 'checked' : ''} /><span class="opt-name">${esc(o.name)}</span><span class="opt-min">${o.min} min</span><span class="opt-note">${esc(o.note)}</span></label></li>`).join('')}</ul>
+              <p class="verdict">${esc(verdict)}</p>` : ''}
             ${s.link ? `<a class="btn small" href="${s.link.href}" target="_blank" rel="noopener">${esc(s.link.label)}</a>` : ''}
             <div class="stop-note">
               <label for="note-${s.id}">Field notes</label>
@@ -308,7 +373,12 @@
       S.notes[ta.dataset.note] = { text: ta.value, ts: Date.now() };
       save();
     }));
-    void nowIdx;
+    $$('[data-opt]', root).forEach((cb) => cb.addEventListener('change', () => {
+      const id = cb.dataset.opt;
+      S.plan = cb.checked ? S.plan.concat(id) : S.plan.filter((x) => x !== id);
+      save();
+      const y = window.scrollY; renderDay(); window.scrollTo({ top: y });
+    }));
   }
 
   /* ------------------------------------------------------------------
@@ -413,6 +483,7 @@
     const recent = S.events.slice().sort((a, b) => b.ts - a.ts).slice(0, 12);
     root.innerHTML += `
       <p class="view-intro">Points are awarded by whoever is holding the phone, which is the only fair system.</p>
+      ${(() => { const hh = householdTotals(board); return hh.length > 1 ? `<p class="households">${hh.map((h) => `<span><strong>${esc(h.name)}</strong> ${h.pts}</span>`).join('<span class="vs">vs.</span>')}</p>` : ''; })()}
       <ol class="leader">
         ${board.map((row, i) => `<li><span class="rank">${i + 1}</span><span class="who">${esc(row.p.name)}</span><span class="pts ${row.pts < 0 ? 'neg' : ''}">${row.pts}</span></li>`).join('')}
       </ol>
@@ -629,7 +700,7 @@
     dec: (str) => Uint8Array.from(atob(str.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0)),
   };
   async function encodeState() {
-    const json = JSON.stringify({ players: S.players, bingo: S.bingo, events: S.events, ratings: S.ratings, notes: S.notes, done: S.done, now: S.now });
+    const json = JSON.stringify({ players: S.players, bingo: S.bingo, events: S.events, ratings: S.ratings, notes: S.notes, done: S.done, plan: S.plan, now: S.now });
     const bytes = new TextEncoder().encode(json);
     if (typeof CompressionStream === 'function') {
       const cs = new CompressionStream('deflate-raw');
@@ -670,6 +741,7 @@
       if (!cur || (note.ts || 0) > (cur.ts || 0)) { S.notes[sid] = note; n++; }
     });
     (remote.done || []).forEach((d) => { if (!S.done.includes(d)) { S.done.push(d); n++; } });
+    (remote.plan || []).forEach((d) => { if (!S.plan.includes(d)) { S.plan.push(d); n++; } });
     if (remote.now) {
       const ri = STOPS.findIndex((s) => s.id === remote.now), li = STOPS.findIndex((s) => s.id === S.now);
       if (ri > li) S.now = remote.now;
@@ -775,7 +847,7 @@
     openModal(`
       <h2>Who is on this trip?</h2>
       <p class="muted">One name per line. Everyone gets a bingo card and a place on the scoreboard.</p>
-      <textarea data-names rows="5" placeholder="Noah&#10;…">${S.players.length ? esc(S.players.map((p) => p.name).join('\n')) : 'Noah'}</textarea>
+      <textarea data-names rows="5" placeholder="Noah&#10;…">${S.players.length ? esc(S.players.map((p) => p.name).join('\n')) : 'Noah\nJill\nBlake\nMegan'}</textarea>
       <div class="btn-row"><button type="button" class="btn primary" data-ok>Let’s go</button></div>`,
       (m) => {
         const ta = $('[data-names]', m);
@@ -800,6 +872,11 @@
   function showNotes() {
     openModal(`
       <h2>Release Notes</h2>
+      <div class="release"><h3>1.1.0 · Elm Mott</h3><ul>
+        <li>Added the Martins. Added Summer Moon. Added Austins vs. Martins.</li>
+        <li>Added directions and a map, per the spec “whatever looks best.”</li>
+        <li>The Explore stop now adds up minutes and passes judgment.</li>
+      </ul></div>
       <div class="release"><h3>1.0.0 · Waco</h3><ul>
         <li>Initial release. Contains everything.</li>
         <li>Bingo, Scoreboard, Ratings, Field Notes, Trip Report, Sync.</li>
